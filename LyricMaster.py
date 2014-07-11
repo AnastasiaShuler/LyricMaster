@@ -6,9 +6,11 @@
 # TO DO:
 #   - try/catch for changing directories
 #   - surpress warnings
+#   - Implement the feature to utlize a previous lyrics file
 
 
 import os
+import time
 import eyed3
 import urllib
 
@@ -38,6 +40,19 @@ def startUp():
 def scrapeLyrics():
     # Find out if the user wants to start in the current directory
     # Will change current directory to be where user wants to start
+    while True:
+        q = 'Do you want to start a new Lyrics file? [y/n]'
+        c = raw_input(q).lower()
+        if c == 'y' or c == 'yes':
+            # Start a new file
+            newLyricsFile()
+            break
+        elif c == 'n' or c == 'no':
+            # ask for the existing file
+            break
+        else:
+            print 'I\'m sorry, I don\'t understand what you mean. Try again.'
+
     while True:
         q = 'Do you want to start in the current directory? [y/n]\t'
         cd = raw_input(q).lower()
@@ -84,6 +99,23 @@ def scrapeLyrics():
     print nonMP3
     for entry in songsAndArtists:
         getTheLyrics(entry[0], entry[1])
+
+def newLyricsFile():
+    while True:
+        c = raw_input('Use the default file Name?\t').lower()
+        if c == 'y' or c == 'yes':
+            # make file with the defualt name
+            fileName = 'LyricMaster_LyricsFile_' + time.strftime('%d-%m-%Y')
+            break
+        elif c == 'n' or c == 'no':
+            # ask for their own file name
+            fileName = raw_input('What would you like to call it?\t')
+            break
+        else:
+            print 'I\'m sorry, I don\'t understand what you mean. Try again.'
+    fileName = fileName + '.txt'
+    print fileName
+    return os.open(fileName, 'w')
 
 def getTheLyrics(artist, title):
     # use azlyrics to get lyrics for the songs
