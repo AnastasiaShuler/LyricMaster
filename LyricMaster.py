@@ -10,6 +10,7 @@
 
 import os
 import eyed3
+import urllib
 
 def startUp():
     # Run from command line; Initate start up 
@@ -51,11 +52,14 @@ def scrapeLyrics():
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
     print dir
-    songsAndArtists = [] # List to store the files in
-    # Testing the os.walk funciton
+
+    songsAndArtists = []    # Store mp3 data; [ (artist, title), ...]
+    nonMP3 = [];            # For the non-mp3 files
+
     for path, dirs, files in os.walk(dir):
         for name in files:
             root, ext = os.path.splitext(name)
+            # mp3s can be proccessed with the eyed3 module
             if ext in ['.mp3']:
                 songPath = os.path.join(path, name)
                 sFile = eyed3.load(songPath)
@@ -65,19 +69,37 @@ def scrapeLyrics():
                     sTitle = sFile.tag.title
                     songsAndArtists.append((sArtist,sTitle))
                 except AttributeError:
+                    root = root.replace('.', ' ')
+                    root = root.replace('_', ' ')
+                    nonMP3.append(root)
                     print 'This .mp3 doesn\'t seem to have meta data'
+            elif ext in ['.m4a', '.m4p', '.wav', '.wma']: 
+                root = root.replace('.', ' ')
+                root = root.replace('_', ' ')
+                nonMP3.append(root)
+    print
+    print
+    print
     print songsAndArtists
+    print nonMP3
+    for entry in songsAndArtists:
+        getTheLyrics(entry[0], entry[1])
 
-#        for name in files:
-#            # Add the music files to a list
-#            root, ext = os.path.splitext(name)
-#            if ext in ['.mp3', '.m4a', '.m4p', '.wav', '.wma']: 
-#                root = root.replace('.', ' ')
-#                root = root.replace('_', ' ')
-#                musicFiles.append(root)
-#    print musicFiles
-
-
+def getTheLyrics(artist, title):
+    # use azlyrics to get lyrics for the songs
+    urlBase = 'http://www.azlyrics.com/lyrics/'
+    artist = artist.replace(' ', '').lower()
+    title = title.replace(' ','').lower()
+    url = urlBase + artist + '/' + title +'.html'
+    print url
+    
+    html = urllib.urlopen(url)   # Gives HTML for the webpage
+    html = html.read()
+    start = html.find('<!-- start of lyrics -->')
+    end = html.find('<!-- end of lyrics -->')
+    lyrics = html[start+24:end]
+    lyrics = lyrics.replace('<br />', '')
+    print lyrics
 
 if __name__ == "__main__":
     startUp()
