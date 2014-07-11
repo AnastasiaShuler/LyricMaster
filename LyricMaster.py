@@ -15,6 +15,13 @@ import eyed3
 import urllib
 
 def startUp():
+    '''
+    startUp()
+    Runs upon execution of LyricMaster.py; Contains the main menu
+    Inputs: (none)
+    Outputs: (none)
+    '''
+
     # Run from command line; Initate start up 
     os.system('cls' if os.name == 'nt' else 'clear')
     welcomeText = '''
@@ -38,14 +45,23 @@ def startUp():
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
 
 def scrapeLyrics():
+    '''
+    scrapeLyrics()
+    used to traverse the file system tree to gather song artists/titles
+        then use the information to scrape lyrics from azlyrics.com
+    Saves the results to a LyricsFile (text) that can be used for searching
+    Inputs: (none)
+    Outputs: (none)
+    '''
+
     # Find out if the user wants to start in the current directory
     # Will change current directory to be where user wants to start
     while True:
-        q = 'Do you want to start a new Lyrics file? [y/n]'
+        q = 'Do you want to start a new Lyrics file? [y/n]\t'
         c = raw_input(q).lower()
         if c == 'y' or c == 'yes':
             # Start a new file
-            newLyricsFile()
+            LF = newLyricsFile()
             break
         elif c == 'n' or c == 'no':
             # ask for the existing file
@@ -99,8 +115,17 @@ def scrapeLyrics():
     print nonMP3
     for entry in songsAndArtists:
         getTheLyrics(entry[0], entry[1])
+    LF.close()
+
 
 def newLyricsFile():
+    '''
+    newLyricsfile()
+    Initiates a new text file to store the lyrics
+    Gives the option to use the default name or a personalized filename
+    Inputs: (none)
+    Outputs: file Object
+    '''
     while True:
         c = raw_input('Use the default file Name?\t').lower()
         if c == 'y' or c == 'yes':
@@ -115,9 +140,16 @@ def newLyricsFile():
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
     fileName = fileName + '.txt'
     print fileName
-    return os.open(fileName, 'w')
+    return open(fileName, 'w')
 
 def getTheLyrics(artist, title):
+    '''
+    getTheLyrics(artist, title)
+    Uses azlyrics.com to get lyrics for the known artist/title pairs
+    Inputs: artist -- artist of the track
+            title -- title of the track
+    Outputs: lyrics -- string containing the lyrics of the track
+    '''
     # use azlyrics to get lyrics for the songs
     urlBase = 'http://www.azlyrics.com/lyrics/'
     artist = artist.replace(' ', '').lower()
@@ -134,4 +166,7 @@ def getTheLyrics(artist, title):
     print lyrics
 
 if __name__ == "__main__":
+    '''
+    When run from the command line, runs startUp()
+    '''
     startUp()
