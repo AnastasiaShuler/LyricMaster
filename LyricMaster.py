@@ -3,8 +3,13 @@
 
 # Import all the things
 
-import os
+# TO DO:
+#   - try/catch for changing directories
+#   - surpress warnings
 
+
+import os
+import eyed3
 
 def startUp():
     # Run from command line; Initate start up 
@@ -46,14 +51,31 @@ def scrapeLyrics():
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
     print dir
-    musicFiles = [] # List to store the files in
+    songsAndArtists = [] # List to store the files in
     # Testing the os.walk funciton
-    for root, dirs, files in os.walk(dir):
+    for path, dirs, files in os.walk(dir):
         for name in files:
-            
-            musicFiles.append(name)
+            root, ext = os.path.splitext(name)
+            if ext in ['.mp3']:
+                songPath = os.path.join(path, name)
+                sFile = eyed3.load(songPath)
+                # Want to make sure this doesn't break if the .mp3 doesn't have shit
+                try:
+                    sArtist = sFile.tag.artist
+                    sTitle = sFile.tag.title
+                    songsAndArtists.append((sArtist,sTitle))
+                except AttributeError:
+                    print 'This .mp3 doesn\'t seem to have meta data'
+    print songsAndArtists
 
-    print musicFiles
+#        for name in files:
+#            # Add the music files to a list
+#            root, ext = os.path.splitext(name)
+#            if ext in ['.mp3', '.m4a', '.m4p', '.wav', '.wma']: 
+#                root = root.replace('.', ' ')
+#                root = root.replace('_', ' ')
+#                musicFiles.append(root)
+#    print musicFiles
 
 
 
