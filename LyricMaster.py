@@ -1,5 +1,5 @@
 # LYRICMASTER V1 BETA
-# June 10, 2014
+# June 14, 2014
 
 # Import all the things
 
@@ -13,6 +13,7 @@ import os
 import time
 import eyed3
 import urllib
+import fileinput
 
 def startUp():
     '''
@@ -23,6 +24,7 @@ def startUp():
     '''
 
     # Run from command line; Initate start up 
+    # Clear the terminal; allows for both windows and unix use
     os.system('cls' if os.name == 'nt' else 'clear')
     welcomeText = '''
     Welcome to LyricMaster
@@ -43,6 +45,7 @@ def startUp():
             print 'Alright. Lets do this'
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
+
 
 def scrapeLyrics():
     '''
@@ -65,7 +68,7 @@ def scrapeLyrics():
             break
         elif c == 'n' or c == 'no':
             # ask for the existing file
-            break
+            print 'I\'m sory, this feature has not been implemented yet :('
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
 
@@ -86,20 +89,23 @@ def scrapeLyrics():
 
     songsAndArtists = []    # Store mp3 data; [ (artist, title), ...]
     nonMP3 = [];            # For the non-mp3 files
+    added = [];             # To keep track of which songs have been added to LF
 
     for path, dirs, files in os.walk(dir):
         for name in files:
             root, ext = os.path.splitext(name)
             # mp3s can be proccessed with the eyed3 module
             if ext in ['.mp3']:
-                songPath = os.path.join(path, name)
+                songPath = os.path.join(path, name) # Get filepath
                 sFile = eyed3.load(songPath)
-                # Want to make sure this doesn't break if the .mp3 doesn't have shit
+                # try/catch to avoid throwing AttributeError
                 try:
+                    # use eyed3 module to get meta data
                     sArtist = sFile.tag.artist
                     sTitle = sFile.tag.title
                     songsAndArtists.append((sArtist,sTitle))
                 except AttributeError:
+                    # remove any sort of odd characters from filename
                     root = root.replace('.', ' ')
                     root = root.replace('_', ' ')
                     nonMP3.append(root)
@@ -108,13 +114,27 @@ def scrapeLyrics():
                 root = root.replace('.', ' ')
                 root = root.replace('_', ' ')
                 nonMP3.append(root)
+    # Give some new lines in here to make it a little easier to read
     print
     print
     print
     print songsAndArtists
     print nonMP3
+    allFiles = songsAndArtists + nonMP3
+    LF.write(str(allFiles) + '\n\n');    # Make this the first line in the LF
+    LF.write('\n\n')
+    # Will need to change this; can't include files that have no lyrics
+
+    # Scrape azlyrics; currently only does the artist/title combos 
     for entry in songsAndArtists:
-        getTheLyrics(entry[0], entry[1])
+        getTheLyrics(entry[0], entry[1], LF, added)
+
+    # This doesn't work
+    #LF.seek(0)
+    #LF.write(str(added))
+
+    print 'Lyric Collection Complete\n\n'
+    # Closes the lyric file; Will eventually be moved
     LF.close()
 
 
@@ -130,7 +150,7 @@ def newLyricsFile():
         c = raw_input('Use the default file Name?\t').lower()
         if c == 'y' or c == 'yes':
             # make file with the defualt name
-            fileName = 'LyricMaster_LyricsFile_' + time.strftime('%d-%m-%Y')
+            fileName = 'LMLF' + '_' + time.strftime('%d-%m-%Y')
             break
         elif c == 'n' or c == 'no':
             # ask for their own file name
@@ -139,15 +159,18 @@ def newLyricsFile():
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
     fileName = fileName + '.txt'
-    print fileName
+    print 'Created new LyricFile called ' + fileName
     return open(fileName, 'w')
 
-def getTheLyrics(artist, title):
+
+def getTheLyrics(artist, title, LF, added):
     '''
     getTheLyrics(artist, title)
     Uses azlyrics.com to get lyrics for the known artist/title pairs
     Inputs: artist -- artist of the track
             title -- title of the track
+            lyricFile -- text file to store lyrics in
+            added -- list containing all the artists/songs added to the file
     Outputs: lyrics -- string containing the lyrics of the track
     '''
     # use azlyrics to get lyrics for the songs
@@ -161,9 +184,19 @@ def getTheLyrics(artist, title):
     html = html.read()
     start = html.find('<!-- start of lyrics -->')
     end = html.find('<!-- end of lyrics -->')
+    if start == -1 or end == -1:
+        #There's no lyrics for this combination
+        return
+
     lyrics = html[start+24:end]
     lyrics = lyrics.replace('<br />', '')
+    lyrics = lyrics.replace('\n', ' ')   # Remove all of the new lines
+
+    lyrics = artist + ', ' + title + ': ' + lyrics + '\n'
     print lyrics
+    LF.write(lyrics)
+    added.append((artist,title))
+
 
 if __name__ == "__main__":
     '''
