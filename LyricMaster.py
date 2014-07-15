@@ -139,7 +139,7 @@ def scrapeLyrics(origDir):
     writer = idx.writer()
     for entry in songsAndArtists:
         # Scrape the lyrics and add them to the index
-        lyrics(entry[0], entry[1], writer)
+        addLyrics(entry[0], entry[1], writer)
     # Change directory back to original directory
     os.chdir(origDir) 
     writer.commit()      # commit and close the writer
@@ -155,7 +155,7 @@ def newIndex():
     '''
     print '\tCreating a new Index in the current directory'
     # Create an index to store the artist/title and lyrics
-    schm = Schema(artistAndSong=KEYWORD(stored=True), lyrics = TEXT(stored=True))
+    schm = Schema(artistAndSong=KEYWORD(stored=True), lyrics=TEXT(stored=True))
     # Create a directory called LM_Storage; will contain the index
     # See Whoosh documentation for more information
     if not os.path.exists('LM_Storage'):
@@ -167,9 +167,9 @@ def newIndex():
     return idx
 
 
-def lyrics(artist, title, writer):
+def addLyrics(artist, title, writer):
     '''
-    lyrics(artist, title, writer)
+    addLyrics(artist, title, writer)
     Used to scrape the lyrics; 
     replacement for getTheLyrics()
     INPUTS: artist -- artist of the track
@@ -195,11 +195,10 @@ def lyrics(artist, title, writer):
 
     l = html[start+24:end]
     l = l.replace('<br />', '')
-    l = l.replace('\n', ' ')   # Remove all of the new lines
+
     #print l
     at = a + ' ' + title
-    writer.add_document(artistAndSong = at.decode())
-    writer.add_document(lyrics = l.decode())
+    writer.add_document(artistAndSong = at.decode(), lyrics = l.decode())
 
 def searchIndex():
     '''
