@@ -77,13 +77,14 @@ def scrapeLyrics(origDir):
         if c == 'y' or c == 'yes':
             # Start a new file
             #LF = newLyricsFile() # Chaning to index
-            (idx, w) = newIndex()
+            idx = newIndex()
             break
         elif c == 'n' or c == 'no':
             # ask for the existing file
             print 'I\'m sory, this feature has not been implemented yet :('
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
+
     # Find directory
     while True:
         q = 'Do you want to start in the current directory? [y/n]\t'
@@ -127,7 +128,6 @@ def scrapeLyrics(origDir):
                 root = root.replace('.', ' ')
                 root = root.replace('_', ' ')
                 nonMP3.append(root)
-    # Give some new lines in here to make it a little easier to read
     #print songsAndArtists
     #print nonMP3
 
@@ -135,10 +135,14 @@ def scrapeLyrics(origDir):
     print '\nNOTE: LyricMaster currently only supports mp3 files'
     print 'All other music files will be ignored\n'
 
-    for entry in songsAndArtists:
-        lyrics(entry[0], entry[1], w)
     os.chdir(origDir) 
-    w.commit()
+    writer = idx.writer()
+    for entry in songsAndArtists:
+        # Scrape the lyrics and add them to the index
+        lyrics(entry[0], entry[1], writer)
+    # Change directory back to original directory
+    os.chdir(origDir) 
+    writer.commit()      # commit and close the writer
     print '\nLyric Collection Complete\n\n'
 
 
@@ -149,18 +153,19 @@ def newIndex():
     INPUTS: (none)
     OUTPUTS: idx -- index 
     '''
-    # Want to allow lyric search and artist/title search
     print '\tCreating a new Index in the current directory'
     # Create an index to store the artist/title and lyrics
     schm = Schema(artistAndSong=KEYWORD(stored=True), lyrics = TEXT(stored=True))
+    # Create a directory called LM_Storage; will contain the index
+    # See Whoosh documentation for more information
     if not os.path.exists('LM_Storage'):
         os.mkdir('LM_Storage')
     idxDir ='LM_Storage'
     storage = FileStorage(idxDir)
     idx = storage.create_index(schm, indexname='LM')
     idx = storage.open_index(indexname = 'LM')
-    writer = idx.writer()
-    return idx, writer
+    return idx
+
 
 def lyrics(artist, title, writer):
     '''
@@ -174,6 +179,7 @@ def lyrics(artist, title, writer):
     # use azlyrics to get lyrics for the songs
     urlBase = 'http://www.azlyrics.com/lyrics/'
     a = artist.replace(' ', '').lower()
+    title = title.replace('','').lower()
     t = title.replace(' ','').lower()
     url = urlBase + a + '/' + t +'.html'
     #print url
@@ -191,10 +197,9 @@ def lyrics(artist, title, writer):
     l = l.replace('<br />', '')
     l = l.replace('\n', ' ')   # Remove all of the new lines
     #print l
-    at = a + ' ' + t
+    at = a + ' ' + title
     writer.add_document(artistAndSong = at.decode())
     writer.add_document(lyrics = l.decode())
-
 
 def searchIndex():
     '''
@@ -223,7 +228,7 @@ def searchIndex():
     idxDir = idxDir + '/LM_Storage'
     storage = FileStorage(idxDir)
     idx = storage.open_index(indexname = 'LM')
-    idx.writer().add_document(artistAndSong= u'Nightwish')
+    
     # Determine what the user wants to search for 
     c = ''
     while True:
@@ -256,6 +261,12 @@ def searchForSong(idx):
         #Stuff here
         results = searcher.search(query)
         print 'I\'ve found ' + str(len(results)) + ' results\n'
+
+        for r in results:
+            print r
+        print results[0]
+
+
     return results
 
 def searchForLyrics(idx):
@@ -266,68 +277,7 @@ def searchForLyrics(idx):
     INPUTS: idx -- the index for searching
     OUTPUTS: results -- the results of the search
     '''
-
     pass
-
-def newLyricsFile():
-    '''
-    newLyricsfile()
-    Initiates a new text file to store the lyrics
-    Gives the option to use the default name or a personalized filename
-    Inputs: (none)
-    Outputs: file Object
-    '''
-    while True:
-        c = raw_input('\tUse the default file Name?\t').lower()
-        if c == 'y' or c == 'yes':
-            # make file with the defualt name
-            fileName = 'LMLF' + '_' + time.strftime('%d-%m-%Y')
-            break
-        elif c == 'n' or c == 'no':
-            # ask for their own file name
-            fileName = raw_input('What would you like to call it?\t')
-            break
-        else:
-            print 'I\'m sorry, I don\'t understand what you mean. Try again.'
-    fileName = fileName + '.txt'
-    print '\tCreated new LyricFile called ' + fileName
-    return open(fileName, 'w')
-
-
-def getTheLyrics(artist, title, LF, added):
-    '''
-    getTheLyrics(artist, title)
-    Uses azlyrics.com to get lyrics for the known artist/title pairs
-    Inputs: artist -- artist of the track
-            title -- title of the track
-            lyricFile -- text file to store lyrics in
-            added -- list containing all the artists/songs added to the file
-    Outputs: lyrics -- string containing the lyrics of the track
-    '''
-
-    # use azlyrics to get lyrics for the songs
-    urlBase = 'http://www.azlyrics.com/lyrics/'
-    a = artist.replace(' ', '').lower()
-    t = title.replace(' ','').lower()
-    url = urlBase + a + '/' + t +'.html'
-    #print url
-    
-    html = urllib.urlopen(url)   # Gives HTML for the webpage
-    html = html.read()
-    start = html.find('<!-- start of lyrics -->')
-    end = html.find('<!-- end of lyrics -->')
-    if start == -1 or end == -1:
-        #There's no lyrics for this combination
-        print '\tWhoops. Could not find any lyrics for ' + artist +'/' + title
-        return
-
-    lyrics = html[start+24:end]
-    lyrics = lyrics.replace('<br />', '')
-    lyrics = lyrics.replace('\n', ' ')   # Remove all of the new lines
-    #print lyrics
-    lyrics = artist + ', ' + title + ': ' + lyrics + '\n'
-    LF.write(lyrics)
-    added.append((artist,title))
 
 if __name__ == "__main__":
     '''
