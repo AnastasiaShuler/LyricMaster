@@ -1,16 +1,17 @@
 # LYRICMASTER V1 BETA
-# June 14, 2014
+# June 16, 2014
 
-# Import all the things
 
 # TO DO:
 #   - try/catch for changing directories
 #   - surpress warnings
 #   - Scrape nonMP3 songs
-#   - Implement search feature
-#   - Figure out if new lines can be left in the lyrics field
+#   - Implement a 'similar to' search feature
+#   - manual addition of lyrics and artists
+#   - Remove all non unicode characters; Allow use with non-english titles
 
 
+# Import all the things
 import os
 import time
 import eyed3
@@ -28,27 +29,27 @@ def startUp():
     '''
     startUp()
     Runs upon execution of LyricMaster.py; Contains the main menu
-    Inputs: (none)
-    Outputs: (none)
+    INPUTS: (none)
+    OUTPUTS: (none)
     '''
 
-    # Run from command line; Initate start up 
     # Clear the terminal; allows for both windows and unix use
     os.system('cls' if os.name == 'nt' else 'clear')
     welcomeText = '''
     Welcome to LyricMaster
-    V1 Beta; June 14, 2014\n\n
+    V1 Beta; June 16, 2014\n\n
     '''
-    origDir = os.getcwd();
+    origDir = os.getcwd();  # Save this so we can go back to it
     print welcomeText
     c = '';
     # Prompt the user for some action
     while c != 'q':
-        os.chdir(origDir)
+        os.chdir(origDir)   # Change directory back; useful for search
         print 'What would you like to do?'
         c =raw_input('Scrape Lyrics [L], Search [s], Quit [q] \t').lower()
         if c == 'q' or c == 'quit':
             print 'Thanks for using LyricMaster. We hope to see you soon! \n\n'
+            break
         elif c == 'l' or c == 'lyrics' or c == 'scrape lyrics':
             print '\tFinding Lyrics'
             scrapeLyrics(origDir)
@@ -65,8 +66,8 @@ def scrapeLyrics(origDir):
     used to traverse the file system tree to gather song artists/titles
         then use the information to scrape lyrics from azlyrics.com
     Saves the results to a LyricsFile (text) that can be used for searching
-    Inputs: origDir -- starting directory; place to create index
-    Outputs: (none)
+    INPUTS: origDir -- starting directory; place to create index
+    OUTPUTS: (none)
     '''
 
     # Find out if the user wants to start in the current directory
@@ -82,6 +83,10 @@ def scrapeLyrics(origDir):
         elif c == 'n' or c == 'no':
             # ask for the existing file
             print 'I\'m sory, this feature has not been implemented yet :('
+        elif c == 'q' or c == 'quit':
+            # Return to the main menu
+            print '\tReturning to the Main Menu\n'
+            return 
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
 
@@ -97,6 +102,10 @@ def scrapeLyrics(origDir):
         elif cd == 'y' or cd == 'yes':
             dir = os.getcwd()
             break
+        elif cd == 'q' or cd == 'quit':
+            # Return to the main menu
+            print '\tReturing to Main Menu\n'
+            return
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
     print dir
@@ -222,6 +231,9 @@ def searchIndex():
             idxDir = raw_input('Where is it?\t').lower()
             os.chdir(idxDir)
             break
+        elif c == 'q' or c == 'quit':
+            print '\tReturning to the Main Menu'
+            return
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
 
@@ -241,6 +253,9 @@ def searchIndex():
         elif c == 'l' or c == 'lyrics':
             searchForLyrics(idx)
             break
+        elif c == 'q' or c == 'quit':
+            print '\tReturning to the Main Menu'
+            return 
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
 
@@ -272,9 +287,12 @@ def searchForSong(idx):
         while True:
             ques = 'Which number do you want to see the lyrics to?\t'
             c = raw_input(ques)
+            if c == 'q' or c == 'quit':
+                print '\tReturning to the Main Menu'
+                return
             try:
                 num = int(c)
-                if not(num > 0 and num < len(results)):
+                if not(num >= 0 and num < len(results)):
                     print 'Hm. It seems you didn\'t enter a valid nubmer. Try again'
                 else:
                     break
@@ -314,9 +332,12 @@ def searchForLyrics(idx):
         while True:
             ques = 'Which number do you want to see the lyrics to?\t'
             c = raw_input(ques)
+            if c == 'q' or c == 'quit':
+                print '\tReturning to the Main Menu'
+                return
             try:
                 num = int(c)
-                if not(num > 0 and num < len(results)):
+                if not(num >= 0 and num < len(results)):
                     print 'Hm. It seems you didn\'t enter a valid nubmer. Try again'
                 else:
                     break
