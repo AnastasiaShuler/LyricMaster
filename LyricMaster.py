@@ -195,6 +195,8 @@ def addLyrics(artist, title, writer):
 
     l = html[start+24:end]
     l = l.replace('<br />', '')
+    l = l.replace('</i>', '')
+    l = l.replace('<i>', '')
 
     #print l
     at = a + ' ' + title
@@ -248,25 +250,41 @@ def searchForSong(idx):
     Searhces the given index for the specified artist/title
       Will not search Lyric text
     INPUTS: idx -- the index for searching
-    OUTPUTS: results -- the results of the search
+    OUTPUTS: (none)
     '''
     print '\tSearching Arist and Title data'
+    # Get the query from the user
     q = 'Enter keywords, seperated by spaces\t'
     c = raw_input(q).lower()
     parser = QueryParser('artistAndSong', idx.schema)
     query = parser.parse(c.decode())
-    print query
+    # print query
+    # Open a searcher() object and find the correct result
     with idx.searcher() as searcher:
-        #Stuff here
         results = searcher.search(query)
         print 'I\'ve found ' + str(len(results)) + ' results\n'
+        
+        for i in range(0,len(results)):
+            print str(i) + '. ' + results.fields(i)['artistAndSong']
 
-        for r in results:
-            print r
-        print results[0]
+        print   # Give some buffer space for readability
 
-
-    return results
+        while True:
+            ques = 'Which number do you want to see the lyrics to?\t'
+            c = raw_input(ques)
+            try:
+                num = int(c)
+                if not(num > 0 and num < len(results)):
+                    print 'Hm. It seems you didn\'t enter a valid nubmer. Try again'
+                else:
+                    break
+            except ValueError:
+                print 'Hm. It seems you didn\'t enter a valid nubmer. Try again'
+        print '\n\n\n\n'
+        print 'Displaying lyrics for: ' + results.fields(num)['artistAndSong']
+        print results.fields(num)['lyrics']
+        print '\n\n'
+        # Return to the main menu
 
 def searchForLyrics(idx):
     '''
@@ -274,9 +292,41 @@ def searchForLyrics(idx):
     Searches the given index in the lyrics field for the phrase
       Will not search artist/title
     INPUTS: idx -- the index for searching
-    OUTPUTS: results -- the results of the search
+    OUTPUTS: (none)
     '''
-    pass
+    # Search through song lyrics for the specified phrase
+    q = 'Enter your phrase for the lyric serach\t'
+    c = raw_input(q).lower()
+    parser = QueryParser('lyrics', idx.schema)
+    query = parser.parse(c.decode())
+    # print query
+    # Open a searcher() object and find the correct result
+    with idx.searcher() as searcher:
+        results = searcher.search(query)
+        print 'I\'ve found ' + str(len(results)) + ' results\n'
+        print 'Here are the songs with those lyrics'
+
+        for i in range(0,len(results)):
+            print str(i) + '. ' + results.fields(i)['artistAndSong']
+
+        print   # Give some buffer space for readability
+
+        while True:
+            ques = 'Which number do you want to see the lyrics to?\t'
+            c = raw_input(ques)
+            try:
+                num = int(c)
+                if not(num > 0 and num < len(results)):
+                    print 'Hm. It seems you didn\'t enter a valid nubmer. Try again'
+                else:
+                    break
+            except ValueError:
+                print 'Hm. It seems you didn\'t enter a valid nubmer. Try again'
+        print '\n\n\n\n'
+        print 'Displaying lyrics for: ' + results.fields(num)['artistAndSong']
+        print results.fields(num)['lyrics']
+        print '\n\n'
+        # Return to the main menu
 
 if __name__ == "__main__":
     '''
