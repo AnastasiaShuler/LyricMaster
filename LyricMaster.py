@@ -120,6 +120,7 @@ def scrapeLyrics(origDir):
             # mp3s can be proccessed with the eyed3 module
             if ext in ['.mp3']:
                 songPath = os.path.join(path, name) # Get filepath
+                print 'this is the path: ' + songPath.decode()
                 sFile = eyed3.load(songPath)
                 # try/catch to avoid throwing AttributeError
                 try:
@@ -210,6 +211,7 @@ def addLyrics(artist, title, writer):
     #print l
     at = a + ' ' + title
     writer.add_document(artistAndSong = at.decode(), lyrics = l.decode())
+
 
 def searchIndex():
     '''
@@ -313,6 +315,7 @@ def searchForLyrics(idx):
     OUTPUTS: (none)
     '''
     # Search through song lyrics for the specified phrase
+    print '\t Searching Lyrics'
     q = 'Enter your phrase for the lyric serach\t'
     c = raw_input(q).lower()
     parser = QueryParser('lyrics', idx.schema)
@@ -321,14 +324,14 @@ def searchForLyrics(idx):
     # Open a searcher() object and find the correct result
     with idx.searcher() as searcher:
         results = searcher.search(query)
-        print 'I\'ve found ' + str(len(results)) + ' results\n'
+        print '\nI\'ve found ' + str(len(results)) + ' results\n'
         print 'Here are the songs with those lyrics'
 
         for i in range(0,len(results)):
             print str(i) + '. ' + results.fields(i)['artistAndSong']
 
         print   # Give some buffer space for readability
-
+        if 
         while True:
             ques = 'Which number do you want to see the lyrics to?\t'
             c = raw_input(ques)
