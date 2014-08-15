@@ -1,3 +1,5 @@
+# -*- coding: utf_8 -*-
+
 # LYRICMASTER V1 BETA
 # June 16, 2014
 
@@ -96,11 +98,17 @@ def scrapeLyrics(origDir):
         cd = raw_input(q).lower()
         if cd == 'n' or cd == 'no':
             # Change to the directory we want
-            dir = raw_input('What directory do you want to start in?\t')
-            os.chdir(dir)
+            while True:
+                q = 'What directory do you want to start in?\t'
+                dir = raw_input(q).decode()
+                try:
+                    os.chdir(dir)
+                    break
+                except WindowsError:
+                    print 'Sorry, I couldn\'t navigate to that directory'
             break
         elif cd == 'y' or cd == 'yes':
-            dir = os.getcwd()
+            dir = os.getcwd().decode()
             break
         elif cd == 'q' or cd == 'quit':
             # Return to the main menu
@@ -119,8 +127,12 @@ def scrapeLyrics(origDir):
             root, ext = os.path.splitext(name)
             # mp3s can be proccessed with the eyed3 module
             if ext in ['.mp3']:
-                songPath = os.path.join(path, name) # Get filepath
-                print 'this is the path: ' + songPath.decode()
+                #print name.encode('ascii')
+                songPath = (os.path.join(path, name))   # Get filepath
+                songPath = songPath.encode('ascii')
+                print songPath
+                #songPath = songPath.encode('ascii', 'ignore')
+                print 'this is the path: ' + songPath
                 sFile = eyed3.load(songPath)
                 # try/catch to avoid throwing AttributeError
                 try:
@@ -230,8 +242,13 @@ def searchIndex():
             idxDir = os.getcwd()
             break
         elif c == 'n' or c == 'no':
-            idxDir = raw_input('Where is it?\t').lower()
-            os.chdir(idxDir)
+            while True:
+                idxDir = raw_input('Where is it?\t').lower()
+                try:
+                    os.chdir(idxDir)
+                    break
+                except WindowsError:
+                    print 'Sorry, I couldn\'t navigate to that directory'
             break
         elif c == 'q' or c == 'quit':
             print '\tReturning to the Main Menu'
@@ -331,7 +348,6 @@ def searchForLyrics(idx):
             print str(i) + '. ' + results.fields(i)['artistAndSong']
 
         print   # Give some buffer space for readability
-        if 
         while True:
             ques = 'Which number do you want to see the lyrics to?\t'
             c = raw_input(ques)
