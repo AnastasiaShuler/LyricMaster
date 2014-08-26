@@ -13,6 +13,7 @@ import os
 import time
 import eyed3
 import urllib
+import warnings
 
 def startUp():
     '''
@@ -21,7 +22,8 @@ def startUp():
     Inputs: (none)
     Outputs: (none)
     '''
-
+    
+    warnings.filterwarnings('ignore')
     # Run from command line; Initate start up 
     os.system('cls' if os.name == 'nt' else 'clear')
     welcomeText = '''
