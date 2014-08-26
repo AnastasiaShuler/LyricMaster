@@ -18,9 +18,7 @@ import os
 import time
 import eyed3
 import urllib
-<<<<<<< HEAD
 import warnings
-=======
 import fileinput
 from whoosh.fields import Schema, TEXT, KEYWORD
 from whoosh.index import create_in
@@ -29,7 +27,6 @@ from whoosh.filedb.filestore import FileStorage
 from whoosh.query import *
 from whoosh.qparser import QueryParser
 
->>>>>>> dbc967c5078ecad27c904adb17a3d5ec150af50a
 
 def startUp():
     '''
@@ -38,14 +35,10 @@ def startUp():
     INPUTS: (none)
     OUTPUTS: (none)
     '''
-<<<<<<< HEAD
-    
     warnings.filterwarnings('ignore')
     # Run from command line; Initate start up 
-=======
 
     # Clear the terminal; allows for both windows and unix use
->>>>>>> dbc967c5078ecad27c904adb17a3d5ec150af50a
     os.system('cls' if os.name == 'nt' else 'clear')
     welcomeText = '''
     Welcome to LyricMaster
@@ -126,7 +119,7 @@ def scrapeLyrics(origDir):
             return
         else:
             print 'I\'m sorry, I don\'t understand what you mean. Try again.'
-    print dir
+    #print dir
 
     songsAndArtists = []    # Store mp3 data; [ (artist, title), ...]
     nonMP3 = [];            # For the non-mp3 files
@@ -142,7 +135,7 @@ def scrapeLyrics(origDir):
                 songPath = songPath.encode('ascii')
                 print songPath
                 #songPath = songPath.encode('ascii', 'ignore')
-                print 'this is the path: ' + songPath
+                #print 'this is the path: ' + songPath
                 sFile = eyed3.load(songPath)
                 # try/catch to avoid throwing AttributeError
                 try:
@@ -232,7 +225,11 @@ def addLyrics(artist, title, writer):
 
     #print l
     at = a + ' ' + title
-    writer.add_document(artistAndSong = at.decode(), lyrics = l.decode())
+    try:
+        writer.add_document(artistAndSong = at.decode(), lyrics = l.decode())
+    except UnicodeDecodeError:
+        print 'Whoops. We had some trouble adding one of the files'
+        print at.decode() + ' ' + l.decode()
 
 
 def searchIndex():
