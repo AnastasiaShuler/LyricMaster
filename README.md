@@ -9,3 +9,4 @@ Features:
 - Navigate through file tree to find all music files
 - Scrape lyrics from online source
 - Create a searchable index object
+- allow search of both artist/title parings and lyrics
